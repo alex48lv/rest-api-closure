@@ -15,6 +15,12 @@ app.get("/", (req, res) => {
     res.json({message: ""});
 });*/
 
+app.use(function (req, res, next) {
+    console.log('Time:', Date.now());
+    console.log(req.hostname);
+    next();
+});
+
 require("./app/routes/user.routes")(app);
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {console.log(`server is running on port ${PORT}`)});

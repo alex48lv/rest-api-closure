@@ -41,6 +41,19 @@ exports.create = (req, res) => {
     })
 };
 
+// get all users
+exports.getAll = (req, res) => {
+    // find users
+    User.findAll((err, data) => {
+        if (err) {
+            res.status(500).send({ message: err.message || "Some error occured at get all users" });
+        } else {
+            res.send(data);
+        }
+    });
+
+};
+
 exports.send = (req, res) => {
     if (!req.body) {
         res.status(400).send({

@@ -9,7 +9,7 @@ module.exports = app => {
     router.post("/message", message.send);
 
     // get all users
-    //router.get("/", user.getAll);
+    router.get("/", user.getAll);
 
     
     
