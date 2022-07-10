@@ -1,31 +1,35 @@
 const User = require("../models/user.model");
-const Message = require("../models/message.model");
 const sql = require("../models/db.js");
 const { check, validationResult } = require("express-validator");
 
 exports.validate = [
     check('login').isLength({ min: 5 }).withMessage('Login must be at least 5 characters'),
+    check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+    check('confirmPassword').custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error('Passwords do not match!');
+        }
+        return true;
+    }),
+    check('email').isEmail().custom(email => {
+        return User.findUserByEmail(email).then(user => {
+            if (user) {
+                return Promise.reject('E-mail is already in use. Forgot your login? Click the link to restore password');
+            }
+        });
+    }),
 ];
 
 exports.create = (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({errors: errors.array()});
+        return res.status(400).json({ errors: errors.array() });
     }
-    
-    /*
-    User.validate = (req) => {
-        sql.query('SELECT id FROM users WHERE login = ?', [req.body.login], function (results) {
-            if (results.length > 0) {
-                console.log("User login already exists");
-            }
-        })
-    }
-    */
 
     const user = new User({
         login: req.body.login,
         password: req.body.password,
+        confirmPassword: req.body.confirmPassword,
         email: req.body.email,
         enabled: req.body.enabled || true
     });
@@ -52,29 +56,6 @@ exports.getAll = (req, res) => {
         }
     });
 
-};
-
-exports.send = (req, res) => {
-    if (!req.body) {
-        res.status(400).send({
-            message: "Bad request"
-        })
-    }
-
-    const message = new Message({
-        login: req.body.login,
-        text: req.body.text
-    });
-
-    Message.send(message, (err, data) => {
-        if (err) {
-            res.status(500).send({
-                message: "Internal server error"
-            })
-        } else {
-            res.send(data);
-        }
-    })
 };
 /*
 exports.getAll = (req, res) => {

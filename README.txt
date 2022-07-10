@@ -10,4 +10,4 @@ URL                 Method        Action
 api/users           POST	    add new user
 api/users           GET 	    get all users
 
-api/users/message   POST	    post message
+api/message   POST	    post message

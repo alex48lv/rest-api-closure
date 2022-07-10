@@ -3,6 +3,7 @@ const sql = require("./db.js");
 const User = function(user) {
     this.login = user.login;
     this.password = user.password;
+//    this.confirmPassword = user.confirmPassword;
     this.email = user.email;
     this.enabled = user.enabled;
 }
@@ -29,11 +30,24 @@ User.findAll = result => {
         }
         console.log("users: " + res);
         result(null, res);
-    }); 
+    });
+};
 
-}
-
-
+User.findUserByEmail = (email, result) => {
+    console.log(email);
+    sql.query(`SELECT * FROM users WHERE email = '${email}'`, (err, res) => {
+        if(err) {
+            console.log("Error: " + err);
+            result(null, err);
+            return;
+        }
+        if(res.length) {
+            console.log("email found");
+            //result(null, res[0]);
+            return Promise.resolve(email);
+        }
+    });
+};
 
 module.exports = User;
 
