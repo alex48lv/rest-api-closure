@@ -1,58 +1,47 @@
 const sql = require("./db.js");
+const { nanoid } = require('nanoid');
 
-const User = function(user) {
+const User = function (user) {
     this.login = user.login;
     this.password = user.password;
-//    this.confirmPassword = user.confirmPassword;
     this.email = user.email;
     this.enabled = user.enabled;
 }
 
-User.create = (newUser, result) => {
-    sql.query("INSERT INTO users SET ?", newUser, (err, res) => {
-        if (err) {
-            console.error("Error: ", err);
-            result(null, err);
-            return;
-        }
-        console.log("created user: ", {id: res.insertId, ...newUser});
-        result(null, {id: res.insertId, ...newUser})
-    })
-};
+User.checkAndSave = (login, email, newUser, result) => {
+    console.log(login);
+    sql.query(`SELECT COUNT(*) AS logins FROM users WHERE login = '${login}'`, (err, res) => {
+        if (err) throw err;
 
-User.findAll = result => {
-    let query = "SELECT * FROM users";
-    sql.query(query, (err, res) =>{
-        if(err) {
-            console.log("Error: " + err);
-            result(null, err);
-            return;
+        const loginCount = res[0].logins;
+        if (loginCount === 1) {
+            result(null, { error: "Выберите пожалуйста другое имя пользователя" });
+        } else if (loginCount > 1) {
+            result(null, { error: "Ошибка сервера" });
         }
-        console.log("users: " + res);
-        result(null, res);
-    });
-};
 
-User.findUserByEmail = (email, result) => {
-    console.log(email);
-    sql.query(`SELECT * FROM users WHERE email = '${email}'`, (err, res) => {
-        if(err) {
-            console.log("Error: " + err);
-            result(null, err);
-            return;
-        }
-        if(res.length) {
-            console.log("email found");
-            //result(null, res[0]);
-            return Promise.resolve(email);
-        }
+        sql.query(`SELECT COUNT(*) AS emails FROM users WHERE email = '${email}'`, (err, res) => {
+            if (err) throw err;
+
+            const emailCount = res[0].emails;
+            if (emailCount === 1) {
+                const link = nanoid(5);
+                result(null, { error: `Такой адрес электронной почты уже существует в базе данных. Если вы забыли имя пользователя, пройдите по ссылке https://appwhats.com/${link}` });
+            } else if (emailCount > 1) {
+                result(null, { error: "Ошибка сервера" });
+            }
+
+            sql.query("INSERT INTO users SET ?", newUser, (err, res) => {
+                if (err) {
+                    console.error("Error: ", err);
+                    result(null, err);
+                    return;
+                }
+                console.log("created user: ", { id: res.insertId, ...newUser });
+                result(null, { 'text': 'Новый пользователь добавлен в базу данных. ', id: res.insertId, ...newUser });
+            })
+        });
     });
 };
 
 module.exports = User;
-
-
-// SELECT id FROM users WHERE login = ?
-//`SELECT id FROM users WHERE users.login = '${newMessage.login}'`
-//INSERT INTO messages (users_id) SELECT id FROM users WHERE users.login = '${newMessage.login}'
-//`INSERT INTO messages (users_id, text('${newMessage.text}')) SELECT id FROM users WHERE users.login = '${newMessage.login}'`
