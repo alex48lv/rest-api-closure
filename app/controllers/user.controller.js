@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const { check, validationResult } = require("express-validator");
+const bcrypt = require('bcrypt');
 
 exports.validate = [
     check('login').isLength({ min: 5 }).withMessage('Login must be at least 5 characters'),
@@ -13,15 +14,17 @@ exports.validate = [
     check('email').isEmail().normalizeEmail().withMessage('Please enter your e-mail'),
 ];
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 5);
     
     const user = new User({
         login: req.body.login,
-        password: req.body.password,
+        password: hashedPassword,
         confirmPassword: req.body.confirmPassword,
         email: req.body.email,
         enabled: req.body.enabled || true
@@ -36,4 +39,15 @@ exports.create = (req, res) => {
             res.send(data);
         }
     })
+};
+
+exports.getAll = (req, res) => {
+    User.findAll((err, data) => {
+        if (err) {
+            res.status(500).send({ message: err.message || "Some error occured at get all users" });
+        } else {
+            res.send(data);
+        }
+    });
+
 };
