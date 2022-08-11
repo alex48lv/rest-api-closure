@@ -9,7 +9,6 @@ const User = function (user) {
 }
 
 User.checkAndSave = (login, email, newUser, result) => {
-    console.log(login);
     sql.query(`SELECT COUNT(*) AS logins FROM users WHERE login = '${login}'`, (err, res) => {
         if (err) throw err;
 
@@ -33,11 +32,9 @@ User.checkAndSave = (login, email, newUser, result) => {
 
             sql.query("INSERT INTO users SET ?", newUser, (err, res) => {
                 if (err) {
-                    console.error("Error: ", err);
                     result(null, err);
                     return;
                 }
-                console.log("created user: ", { id: res.insertId, ...newUser });
                 result(null, { 'text': 'Новый пользователь добавлен в базу данных. ', id: res.insertId, ...newUser });
             })
         });

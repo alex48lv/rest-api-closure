@@ -1,19 +1,12 @@
-const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const expressValidator = require("express-validator");
 
 var corsOption = { origin: "http://localhost" };
 
 app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-/*
-app.get("/", (req, res) => {
-    res.json({message: ""});
-});*/
 
 app.use(function (req, res, next) {
     console.log('Time:', Date.now());

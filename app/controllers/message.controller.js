@@ -1,6 +1,5 @@
 const Message = require('../models/message.model');
 
-//Create and save new message
 exports.create = (req, res) => {
     if (!req.body) {
         res.status(400).send({

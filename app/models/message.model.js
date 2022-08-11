@@ -16,16 +16,11 @@ Message.saveMessage = (user_id, message, result) => {
         const count = res[0].count;
 
         if (count === 1) {
-            //user exists
             sql.query(`SELECT enabled FROM users WHERE id=${user_id}`, (err, res) => {
                 if (err) throw err;
                 const enabled = res[0].enabled;
-                console.log(enabled);
 
                 if (enabled === 1) {
-                    //user not banned
-
-                    //add message to database
                     sql.query(`INSERT INTO messages (id, user_id, text, date) VALUES (NULL, ${user_id}, '${message}', NULL)`, (err, res) => {
                         if (err) throw err;
 
@@ -36,7 +31,6 @@ Message.saveMessage = (user_id, message, result) => {
                 }
             })
         } else {
-            //user doesn't exist
             result(null, { 'text': `Вы не зарегистрированы! Нажмите на ссылку (https://appwhats.com/${link}), чтобы пройти регистрацию.`});
         }
     })
