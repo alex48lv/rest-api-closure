@@ -4,10 +4,8 @@
 
 Routing = %server%/api
 
+Use Git Bash (or code editor with Git Bash terminal) and run following commands:
 
-URL                 Method        Action
+    to save (register) new user: curl -d '{"login":"test", "password":"test", "confirmPassword":"test", "email":"test@mail.org"}' -H "Content-Type: application/json" -X POST http://localhost:4000/api/users
 
-api/users           POST	    add new user
-api/users           GET 	    get all users
-
-api/messages        POST	    post message
+    to send message: curl -d '{"user_id":"123", "text":"message text"}' -H "Content-Type: application/json" -X POST http://localhost:4000/api/messages
